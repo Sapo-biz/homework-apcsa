@@ -1,0 +1,37 @@
+/*
+**Commands**
+F1 = moveForward();
+F2 = turnLeft();
+F3 = turnAround();
+F4 = turnRight();
+F5 = pickBeeper();
+F6 = dropBeeper();
+
+**Conditions**
+F7 = onBeeper()
+F8 = beeperAhead()
+F9 = leftIsClear()
+F10 = frontIsClear()
+F11 = rightIsClear()
+run with java -jar karel.jar
+*/
+
+void solveTheMaze() {
+    turnRight();
+    while(!onBeeper()) {
+        if(frontIsClear() && !leftIsClear()) {
+            moveForward();
+        }
+        else if((!frontIsClear() && leftIsClear()) || (frontIsClear() && leftIsClear())) {
+            turnLeft();
+            moveForward();
+        }
+        else if(!frontIsClear() && rightIsClear()) {
+            turnRight();
+            moveForward();
+        }
+        else {
+            turnLeft();
+        }
+    }
+}
