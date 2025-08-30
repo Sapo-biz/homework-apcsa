@@ -1,0 +1,54 @@
+/*
+**Commands**
+F1 = moveForward();
+F2 = turnLeft();
+F3 = turnAround();
+F4 = turnRight();
+F5 = pickBeeper();
+F6 = dropBeeper();
+
+**Conditions**
+F7 = onBeeper()
+F8 = beeperAhead()
+F9 = leftIsClear()
+F10 = frontIsClear()
+F11 = rightIsClear()
+run with java -jar karel.jar
+*/
+void quantizeBits() {
+    while(frontIsClear()) {
+        quantizeColumn();
+        moveForward();
+    }
+    quantizeColumn();
+}
+
+void quantizeColumn() {
+    turnLeft();
+    repeat(5) {
+        moveForward();
+    }
+    if(onBeeper()) {
+        while(frontIsClear()) {
+            moveForward();
+            if(!onBeeper()) {
+                dropBeeper();
+            }
+        }
+        turnAround();
+        while(frontIsClear()) {
+            moveForward();
+        }
+        turnLeft();
+    }
+    else {
+        turnAround();
+        while(frontIsClear()) {
+            moveForward();
+            if(onBeeper()) {
+                pickBeeper();
+            }
+        }
+        turnLeft();
+    }
+}
