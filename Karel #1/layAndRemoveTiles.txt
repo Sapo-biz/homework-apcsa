@@ -1,0 +1,53 @@
+void layAndRemoveTiles()
+{
+    fill();
+}
+
+void fill()
+{
+    if(onBeeper()) // when map is filled
+    {
+        turnAround();
+    }
+    else
+    {
+        dropBeeper();
+        if(!beeperAhead() && frontIsClear()) // not at walls
+        {
+            moveForward();
+            fill();
+            // when out of stack this happens every time 
+            // except when turning
+            moveForward(); // (5) (7)
+        }
+        else 
+        {
+            turnLeft();
+            moveForward();
+            fill();
+            // out of stack first (seq-1) (3)
+            moveForward();
+            turnRight();
+        }
+        // this action needs to be alone bc
+        // when you are going out of a stack you need
+        // to pick it EVERY time
+        pickBeeper(); // (seq-2) (4) (6) 
+    }
+}
+
+/*
+F1 = moveForward();
+F2 = turnLeft();
+F3 = turnAround();
+F4 = turnRight();
+F5 = pickBeeper();
+F6 = dropBeeper();
+F7 = onBeeper()
+F8 = beeperAhead()
+F9 = leftIsClear()
+F10 = frontIsClear()
+F11 = rightIsClear()
+F12 = reset
+*/
+
