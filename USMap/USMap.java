@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class USMap 
 {
 	private String citiesFile;
+	private String bigCitiesFile;
 	private double[] latitude;
 	private double[] longitude;
 	private String[] city;
@@ -24,6 +25,8 @@ public class USMap
 	public USMap()
 	{
 		citiesFile = "cities.txt";
+		bigCitiesFile = "bigCities.txt";
+		
 		latitude = new double[1112];
 		longitude = new double[1112];
 		city = new String[1112];
@@ -43,7 +46,7 @@ public class USMap
 		setupCanvas();
 		openToRead(citiesFile);
 		reader(citiesFile);
-		bigCityReader(citiesFile);
+		bigCityReader(bigCitiesFile);
 		draw();
 	}
 	
@@ -87,25 +90,25 @@ public class USMap
 			Scanner emi = new Scanner(myFile);
 			while (emi.hasNextLine()) 
 			{
-				String line = emi.nextLine();
 				String data = emi.nextLine();
+				data = data.trim();
 			
 				// latitude stuff
 				String latTempCoord = data.substring(0, data.indexOf(" "));
 				double latTempCoord2 = Double.parseDouble(latTempCoord);
 				
 				// now get rid of latitude
-				data.substring( data.indexOf(" ")+1 );
+				data = data.substring( data.indexOf(" ")+1 );
 				
 				// longitude stuff 
 				String longTemp = data.substring(0, data.indexOf(" "));
 				double longTemp2 = Double.parseDouble(longTemp);
 				
 				// now get rid of longitude
-				data.substring( data.indexOf(" ")+1 );
+				data = data.substring( data.indexOf(" ")+1 );
 				
 				// get city name
-				String tempCity = data.substring(0, data.indexOf(" "));
+				String tempCity = data.substring(0, data.indexOf(",")-1);
 				// states are garbage, dont need to extract
 				
 				// give the array values we just extracted
@@ -132,11 +135,59 @@ public class USMap
 	/** reads the big cities in */
 	public void bigCityReader(String fileName)
 	{
+		// file, scanner stuff
+		File myFile = new File(fileName);
+		int counter = 0;
 		
+		try 
+        {
+			Scanner flying = new Scanner(myFile);
+			while (flying.hasNextLine()) 
+			{
+				String data = flying.nextLine();
+				data = data.trim();
+				data = data.substring( data.indexOf(" ")+1 );
+				
+				// get city name
+				String tempCity = data.substring(0, data.indexOf(",")-1);
+				
+				// get rid of city name now
+				data = data.substring( data.indexOf(",") +2 );
+				
+				// dont need state
+				data = data.substring( data.indexOf(" ") +1 );
+				
+				// get population
+				int tempPop = Integer.parseInt( data.trim() );
+				
+				// give the array values we just extracted
+				biggestCities[counter] = tempCity;
+				biggestCitiesPop[counter] = tempPop;
+				
+				counter++;
+			}
+			
+			flying.close();
+		}
+		catch (FileNotFoundException e) 
+		{
+			System.out.println("File not found: bigCities.txt");
+			e.printStackTrace();
+		}
 	}
 	
 	public void draw()
     {
+		/* test
+		System.out.println(biggestCities[0]);
+		System.out.println(city[0]);
+		System.out.println(biggestCities[100]);
+		System.out.println(city[100]);
+		System.out.println(latitude[100]);
+		System.out.println(longitude[100]);
+		System.out.println(biggestCities[274]);
+		*/
+		
 		// top 10 cities
         StdDraw.setPenColor(StdDraw.RED);
         
@@ -147,7 +198,7 @@ public class USMap
                 if (biggestCities[i].equals(city[j]))
                 {
                     StdDraw.setPenRadius(0.6*Math.sqrt(biggestCitiesPop[i])/18500);
-                    StdDraw.point(latitude[j], longitude[j]);
+                    StdDraw.point(longitude[j], latitude[j]);
                 }
             }
         }
@@ -155,14 +206,14 @@ public class USMap
 		// big cities
         StdDraw.setPenColor(StdDraw.BLUE);
         
-        for (int i=10; i < biggestCities.length; i++)
+        for (int i=10; i < biggestCities.length-1; i++)
         {
             for (int j=0; j < city.length; j++)
             {
                 if (biggestCities[i].equals(city[j]))
                 {
                     StdDraw.setPenRadius(0.6*Math.sqrt(biggestCitiesPop[i])/18500);
-                    StdDraw.point(latitude[j], longitude[j]);
+                    StdDraw.point(longitude[j], latitude[j]);
                 }
             }
         }
@@ -173,8 +224,7 @@ public class USMap
         
         for (int i=0; i < latitude.length; i++)
         {
-            StdDraw.point(latitude[i], longitude[i]);
+            StdDraw.point(longitude[i], latitude[i]);
         }
     }
-}
 }
