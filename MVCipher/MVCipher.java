@@ -1,3 +1,4 @@
+/* imports */
 import java.util.Scanner;
 import java.io.File;
 import java.io.PrintWriter;
@@ -33,7 +34,19 @@ public class MVCipher
 	}
 	
 	/**
-	 *	Method header goes here
+	 *	run() welcomes the user, keeps on prompting the user for a encoding 
+	 *  key until the user enters a proper value (checks with the 
+	 *  isValidKeyword() method). It would then prompt the user to encrypt
+	 *  or decrypt, and keep on asking until the user enters a proper 
+	 *  value. The user would then be prompted the name of the file to 
+	 *  encrypt/decrypt. Then, you would ask the user to name an output
+	 *  file that would save their encrypted/decrypted content into. After
+	 *  that, we would read the file, and send the information to an 
+	 *  encrypter/decrypter method, which would send back the completed 
+	 *  version. 
+	 * 
+	 * 	Keep in mind that this is all the operations that we need. Below
+	 *  this method are helper methods only.
 	 */
 	public void run() 
 	{
@@ -118,10 +131,14 @@ public class MVCipher
 		}
 	}
 	
+	///
+	/// helper methods.
+	///
+	
 	/**
-	 * validates that the keyword contains only alphabetic characters
+	 * makes sure that the keyword contains only alphabetic characters
 	 * - you dont want a symbol or number keyword
-	 * @param keyword (the keyword to validate)
+	 * @param keyword (the keyword to make sure)
 	 * @return true if valid, false otherwise and ask again
 	 */
 	public boolean isValidKeyword(String keyword) 
@@ -131,6 +148,7 @@ public class MVCipher
 			return false;
 		}
 		
+		// check if all letters of the keyword are valid
 		for (int i = 0; i < keyword.length(); i++) 
 		{
 			char c = keyword.charAt(i);
@@ -151,16 +169,20 @@ public class MVCipher
 	public String toUpperCase(String keyword) 
 	{
 		String result = "";
+		
+		// run through every character in the keyword
 		for (int i = 0; i < keyword.length(); i++) 
 		{
 			char c = keyword.charAt(i);
-			if (c >= 'a' && c <= 'z') 
+			if (c >= 'a' && c <= 'z') // if lowercase
 			{
-				result += (char)(c - 32);
+				result += (char)(c - 32); // add 32 = uppercase version:
+				// not a magic number, 26 letters plus the six symbols
+				// in between uppercase and lowercase (ASCII 91 to 96)
 			} 
 			else 
 			{
-				result += c;
+				result += c; // otherwise already uppercase, just add
 			}
 		}
 		return result;
@@ -168,7 +190,7 @@ public class MVCipher
 	
 	/**
 	 * reads a file line by line and returns the content as a string
-	 * @param filename (the name of the file to read)
+	 * @param filename (the name of the file to read - user provided)
 	 * @return the content of the file as a string
 	 */
 	public String readFile(String filename) 
@@ -177,26 +199,29 @@ public class MVCipher
 		try 
 		{
 			Scanner fileScanner = new Scanner(new File(filename));
+			// read in every line
 			while (fileScanner.hasNextLine()) 
 			{
 				content += fileScanner.nextLine();
 				if (fileScanner.hasNextLine()) 
 				{
-					content += "\n";
+					content += "\n"; // formatting
 				}
 			}
 			fileScanner.close();
 			
-			// Add newline at end if file doesn't end with one
+			// buggy if file doesnt end with a new line.
+			// add newline at end if file doesnt end with one
 			if (content.length() > 0 && !content.endsWith("\n")) 
 			{
-				content += "\n";
+				content += "\n"; 
+				
 			}
 		} 
 		catch (FileNotFoundException e) 
 		{
 			System.out.println("Error: File not found - " + filename);
-			return null;
+			return null; // if no file at all
 		}
 		return content;
 	}
@@ -215,29 +240,39 @@ public class MVCipher
 		
 		for (int i = 0; i < text.length(); i++) 
 		{
-			char c = text.charAt(i);
+			char c = text.charAt(i); // character to encrypt/decrypt
 			
+			// deal with uppercase LETTERS
 			if (c >= 'A' && c <= 'Z') 
 			{
-			char keyChar = keyword.charAt(keywordIndex % 
-				keyword.length());
-			result += processUppercase(c, keyChar, encrypt);
+				// always always always repeat through keyword!!
+				char keyChar = keyword.charAt(keywordIndex % 
+					keyword.length());
+				
+				// call the other helper method, gets back the encrypted
+				// or decrypted single character, and add it to result	
+				result += processUppercase(c, keyChar, encrypt);
 				keywordIndex++;
-			} 
+			}
+			// deal with lowercase LETTERS 
 			else if (c >= 'a' && c <= 'z') 
 			{
 				char keyChar = keyword.charAt(keywordIndex % 
 					keyword.length());
+				
+				// call the other method for lowercase letters, gets back
+				// the en/decrypted character, add to result	
 				result += processLowercase(c, keyChar, encrypt);
 				keywordIndex++;
-			} 
+			}
+			// symbols, numbers, spaces, dont need to do anything. just add
 			else 
 			{
 				result += c;
 			}
 		}
 		
-		return result;
+		return result; // return the total, encrypted text
 	}
 	
 	/**
@@ -249,6 +284,7 @@ public class MVCipher
 	 */
 	public char processLowercase(char c, char keyChar, boolean encrypt) 
 	{
+		// this is the shift value from the key. 
 		int shift = keyChar - 'A' + 1;
 		
 		// if decryption 
@@ -257,24 +293,28 @@ public class MVCipher
 			shift = -shift; 
 		}
 		
+		// otherwise, for encryption, this is simply adding shift value
 		int newChar = c + shift; 
 		
 		// handle alphabet wrap (if shift value makes character go over
 		// or under)
 		while (newChar < 'a') // under a = over wrap
 		{
-			newChar += 26;
+			newChar += 26; // not a magic number: wrap 26 as in 26 letters
+			// in the alphabet
 		}
 		while (newChar > 'z') // over z = down wrap
 		{
-			newChar -= 26;
+			newChar -= 26; // not a magic number: wrap 26 as in 26 letters
+			// in the alphabet
 		}
 		
-		return (char)(newChar);
+		return (char)(newChar); 
 	}
 	
 	/**
 	 * processes an uppercase character for encryption/decryption
+	 * basically a copy of the lowercase version
 	 * @param c (the character to process)
 	 * @param keyChar (the key character)
 	 * @param encrypt (true = encryption, false = decryption)
@@ -294,11 +334,13 @@ public class MVCipher
 		// or under)
 		while (newChar < 'A') 
 		{
-			newChar += 26;
+			newChar += 26; // not a magic number: wrap 26 as in 26 letters
+			// in the alphabet
 		}
 		while (newChar > 'Z') 
 		{
-			newChar -= 26;
+			newChar -= 26; // not a magic number: wrap 26 as in 26 letters
+			// in the alphabet
 		}
 		
 		return (char)(newChar);
